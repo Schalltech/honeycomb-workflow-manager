@@ -41,7 +41,7 @@
                       <table width="100%">
                         <tr>
                           <td style="width:50;">
-                            <img style="height:50; width:50;" src="http://www.adayatatimenj.org/images/home-depot-canada.jpg"/>
+                            <img style="height:50; width:50;" src="https://keyhunter.azurewebsites.net/hd_logo_50x50.png"/>
                           </td>
                           <td align="center" valign="middle">
                             <div style="width:auto;font-size: 26px; color: #333; margin-bottom:5px;margin-top:20;">
@@ -55,7 +55,7 @@
                             </i>
                           </td>
                           <td align="right" style="width:50;">
-                            <!--<img style="padding-right:20px; height:50px; width:50px;" src="https://corporate.homedepot.com/sites/default/files/styles/thumbnail/public/image_gallery/THD_logo.jpg?itok=FoQ5H-ZQ"/>-->
+                            <img style="height:50; width:50;" src="https://keyhunter.azurewebsites.net/gcc_logo_50x50.png"/>
                           </td>
                         </tr>
                       </table>
