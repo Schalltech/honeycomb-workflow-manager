@@ -107,6 +107,9 @@ namespace WFM.Modules
 		{
 			using (HttpClient client = new HttpClient())
 			{
+				string url   = Endpoint;
+				string query = Endpoint.EndsWith("/") ? "" : "/";
+
 				//Define Headers
 				client.DefaultRequestHeaders.Accept.Clear();
 				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -124,19 +127,59 @@ namespace WFM.Modules
 						Logger.Write("RestService.Invoke", param.Name.PadLeft(20, ' ') + ": '" + TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands) + "'", System.Diagnostics.TraceEventType.Information, 2, 0, SharedData.LogCategory);
 						//Logger.Write("RestService.Invoke", "                      " + param.Name + " = '" + TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands) + "'", System.Diagnostics.TraceEventType.Information, 2, 0, SharedData.LogCategory);
 
-						if (String.IsNullOrEmpty(param.Path))
+						if (param.DataType == "body")
 						{
-							body.Add(param.Name, TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands));
+							if (String.IsNullOrEmpty(param.Path))
+							{
+								body.Add(param.Name, TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands));
+							}
+							else
+							{
+								JObject json = JObject.Parse(TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands));
+
+								var x = json[param.Path];
+
+								body.Add(param.Name, x.ToString());
+							}
 						}
-						else
+						else if (param.DataType == "query")
 						{
-							JObject json = JObject.Parse(TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands));
+							if (String.IsNullOrEmpty(param.Path))
+							{
+								query += query.EndsWith("/") ? "" : "/" + TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands);
 
-							var x = json[param.Path];
+								// query += param.Name + "=" + TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands) + "&";
+							}
+							else
+							{
+								JObject json = JObject.Parse(TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands));
 
-							body.Add(param.Name, x.ToString());
+								var x = json[param.Path];
+
+								query += param.Name + "=" + x.ToString() + "&";
+
+								query += query.EndsWith("/") ? "" : "/" + x.ToString();
+							}
+						}
+						else if (param.DataType == "query2")
+						{
+							if (String.IsNullOrEmpty(param.Path))
+							{
+								query += param.Name + "=" + TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands) + "&";
+							}
+							else
+							{
+								JObject json = JObject.Parse(TextParser.Parse(param.Value, DrivingData, SharedData, ModuleCommands));
+
+								var x = json[param.Path];
+
+								query += param.Name + "=" + x.ToString() + "&";
+							}
 						}
 					}
+
+					if (!string.IsNullOrEmpty(query))
+						url += query;
 				}
 
 				FormUrlEncodedContent requestBody = new FormUrlEncodedContent(body);
@@ -146,16 +189,16 @@ namespace WFM.Modules
 				switch (Verb.ToLower())
 				{
 					case "get":
-						request = client.GetAsync(Endpoint).Result;
+						request = client.GetAsync(url).Result;
 						break;
 					case "post":
-						request = client.PostAsync(Endpoint, requestBody).Result;
+						request = client.PostAsync(url, requestBody).Result;
 						break;
 					case "put":
-						request = client.PutAsync(Endpoint, requestBody).Result;
+						request = client.PutAsync(url, requestBody).Result;
 						break;
 					case "delete":
-						request = client.DeleteAsync(Endpoint).Result;
+						request = client.DeleteAsync(url).Result;
 						break;
 				}
 

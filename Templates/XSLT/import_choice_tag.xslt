@@ -49,7 +49,6 @@
                                 <xsl:value-of select="$EmailTitle"/>
                               </b>
                             </div>
-                            <br />
                             <i>
                               Generated on: <xsl:value-of select="$RunDate"/>
                             </i>

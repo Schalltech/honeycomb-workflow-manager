@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 
 namespace WFM.Data
 {
@@ -187,6 +190,7 @@ namespace WFM.Data
 			string concat_type = null;
             string format = null;
             string result = null;
+			string xpath = null;
 
             command = command.Replace("%", "");
 
@@ -218,6 +222,11 @@ namespace WFM.Data
 				{
 					column_name = column_name.Replace("[,]", "");
 					concat_type = "int";
+				}
+				else if (column_name.Contains("[json]"))
+				{
+					xpath       = column_name.Substring(column_name.IndexOf("[json].")).Replace("[json].", "");
+					column_name = column_name.Substring(0, column_name.IndexOf("[json]"));					
 				}
 
 				if (row != null && table_name == row.Table.TableName)
@@ -280,7 +289,18 @@ namespace WFM.Data
                             }
                             else
                             {
-                                result = shared_data.Data.Tables(table_name).Rows[0][column_name].ToString();
+								// Retrieve the value from the column.
+								result = shared_data.Data.Tables(table_name).Rows[0][column_name].ToString();
+
+								// Check to see if we are using xpath to pull the value.
+								if (!string.IsNullOrEmpty(xpath))
+								{
+									JToken json = JToken.Parse(result);
+
+									JToken jt = json.SelectToken("$" + xpath);
+
+									result = jt.ToString();
+								}
                             }
                         }
                         else if (column_name == "__ROWS_COUNT")
